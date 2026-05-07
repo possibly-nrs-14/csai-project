@@ -1,0 +1,30 @@
+sample_fraction = 0.01
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1488  R2=0.0045  alpha=1000.0  clips=48
+  sub-02: Pearson=0.1429  R2=0.0039  alpha=1000.0  clips=48
+  sub-03: Pearson=0.0933  R2=-0.0288  alpha=1000.0  clips=48
+  sub-05: Pearson=0.1018  R2=-0.0215  alpha=1000.0  clips=48
+sample_fraction = 0.02
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1436  R2=-0.0062  alpha=1000.0  clips=48
+  sub-02: Pearson=0.1636  R2=0.0090  alpha=1000.0  clips=48
+  sub-03: Pearson=0.1196  R2=-0.0163  alpha=1000.0  clips=48
+  sub-05: Pearson=0.1159  R2=-0.0127  alpha=1000.0  clips=48
+sample_fraction = 0.04
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1242  R2=-0.0056  alpha=1000.0  clips=48
+  sub-02: Pearson=0.1241  R2=-0.0041  alpha=1000.0  clips=48
+  sub-03: Pearson=0.1467  R2=0.0089  alpha=1000.0  clips=48
+  sub-05: Pearson=0.1123  R2=-0.0076  alpha=1000.0  clips=48
+sample_fraction = 0.08
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1279  R2=-0.0075  alpha=1000.0  clips=48
+  sub-02: Pearson=0.1022  R2=-0.0186  alpha=1000.0  clips=48
+  sub-03: Pearson=0.1279  R2=-0.0012  alpha=1000.0  clips=48
+  sub-05: Pearson=0.1048  R2=-0.0193  alpha=1000.0  clips=48
+sample_fraction = 0.10
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1366  R2=0.0052  alpha=1000.0  clips=48
+  sub-02: Pearson=0.1156  R2=-0.0052  alpha=1000.0  clips=48
+  sub-03: Pearson=0.1091  R2=-0.0168  alpha=1000.0  clips=48
+  sub-05: Pearson=0.0909  R2=-0.0295  alpha=1000.0  clips=48

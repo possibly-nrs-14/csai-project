@@ -1,0 +1,13 @@
+{
+  "model": "ridge",
+  "feature_key": "enc-10layer-fc2",
+  "subject": "sub-01",
+  "n_timepoints": 11287,
+  "n_features": 9216,
+  "n_parcels": 1000,
+  "n_folds": 5,
+  "mean_r": 0.07512917601362278,
+  "median_r": 0.043952880427241325,
+  "max_r": 0.4141041934490204,
+  "pct_positive": 93.0
+}

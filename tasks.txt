@@ -1,0 +1,17 @@
+# Subject  Feature_Key
+sub-01 enc-10layer-fc2  
+sub-01 enc-18layer-norm2  
+sub-01 enc-20layer-fc2  
+sub-01 enc-last-ln
+sub-02 enc-10layer-fc2  
+sub-02 enc-18layer-norm2  
+sub-02 enc-20layer-fc2  
+sub-02 enc-last-ln
+sub-03 enc-10layer-fc2  
+sub-03 enc-18layer-norm2  
+sub-03 enc-20layer-fc2  
+sub-03 enc-last-ln
+sub-05 enc-10layer-fc2  
+sub-05 enc-18layer-norm2  
+sub-05 enc-20layer-fc2  
+sub-05 enc-last-ln

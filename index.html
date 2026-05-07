@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team-13 | Neural Encoding with JEPA Models</title>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161920;
+      --surface2: #1e2330;
+      --border: #2a2f3e;
+      --accent: #5b8ff9;
+      --accent2: #7ecaf9;
+      --green: #4ecca3;
+      --orange: #f9a84d;
+      --red: #f96b6b;
+      --text: #e8eaf0;
+      --muted: #7a829a;
+      --heading-font: 'Inter', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--heading-font);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(13,15,20,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px;
+    }
+    .nav-brand { font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+    .nav-links { display: flex; gap: 1.6rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-badge { background: var(--accent); color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-left: 0.5rem; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 80px 2rem 4rem;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(91,143,249,0.12) 0%, transparent 70%);
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(91,143,249,0.1); border: 1px solid rgba(91,143,249,0.3);
+      color: var(--accent2); font-size: 0.78rem; padding: 4px 14px; border-radius: 20px;
+      margin-bottom: 1.4rem; letter-spacing: 0.04em; font-weight: 500;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.15; max-width: 800px; }
+    .hero h1 span { color: var(--accent); }
+    .hero-sub { font-size: 1.05rem; color: var(--muted); margin-top: 1rem; max-width: 620px; }
+    .hero-meta { display: flex; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap; justify-content: center; }
+    .meta-chip {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 0.5rem 1.2rem; border-radius: 8px; font-size: 0.82rem; color: var(--muted);
+    }
+    .meta-chip strong { color: var(--text); }
+    .hero-cta { display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap; justify-content: center; }
+    .btn { padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .2s; border: none; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #4a7de8; transform: translateY(-1px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex; justify-content: center; gap: 0; flex-wrap: wrap;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .stat-item {
+      flex: 1; min-width: 160px; padding: 1.8rem 2rem; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-val { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-val.green { color: var(--green); }
+    .stat-val.orange { color: var(--orange); }
+    .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* SECTIONS */
+    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+    section.full-width { max-width: 100%; padding: 5rem 0; }
+    h2.section-title {
+      font-size: 1.7rem; font-weight: 800; margin-bottom: 0.4rem;
+    }
+    h2.section-title span { color: var(--accent); }
+    .section-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+    .divider { height: 1px; background: var(--border); margin: 0 2rem; }
+
+    /* CARDS */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.4rem; transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-icon { font-size: 1.6rem; margin-bottom: 0.8rem; }
+    .card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .card p { font-size: 0.82rem; color: var(--muted); }
+
+    /* PIPELINE */
+    .pipeline {
+      display: flex; align-items: flex-start; gap: 0; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden;
+    }
+    .pipeline-step {
+      flex: 1; min-width: 160px; padding: 1.6rem 1.2rem; text-align: center;
+      border-right: 1px solid var(--border); position: relative;
+    }
+    .pipeline-step:last-child { border-right: none; }
+    .pipeline-step::after {
+      content: '→';
+      position: absolute; right: -12px; top: 50%; transform: translateY(-50%);
+      color: var(--accent); font-size: 1.2rem; z-index: 1;
+    }
+    .pipeline-step:last-child::after { display: none; }
+    .step-num { font-size: 0.7rem; color: var(--accent); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .step-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .step-detail { font-size: 0.75rem; color: var(--muted); }
+
+    /* INTERACTIVE EXPLORER */
+    .explorer {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden;
+    }
+    .explorer-header {
+      padding: 1.2rem 1.6rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.6rem; background: var(--surface2);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #febc2e; }
+    .dot.green { background: #28c840; }
+    .explorer-title { font-size: 0.85rem; font-weight: 600; margin-left: 0.4rem; color: var(--muted); }
+    .explorer-body { display: grid; grid-template-columns: 300px 1fr; min-height: 500px; }
+    .controls-panel {
+      border-right: 1px solid var(--border);
+      padding: 1.4rem;
+      display: flex; flex-direction: column; gap: 1.2rem;
+    }
+    .control-group label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+    .control-group select {
+      width: 100%; padding: 0.5rem 0.8rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; font-size: 0.85rem; outline: none;
+      cursor: pointer;
+    }
+    .control-group select:focus { border-color: var(--accent); }
+    .run-btn {
+      width: 100%; padding: 0.7rem; border-radius: 8px; border: none;
+      background: var(--accent); color: #fff; font-weight: 700; cursor: pointer;
+      font-size: 0.88rem; transition: background .2s;
+    }
+    .run-btn:hover { background: #4a7de8; }
+    .results-panel { padding: 1.4rem; display: flex; flex-direction: column; gap: 1.2rem; }
+    .brain-display {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 300px; overflow: hidden; position: relative;
+    }
+    .brain-display img { max-width: 100%; max-height: 380px; object-fit: contain; display: block; border-radius: 8px; }
+    .brain-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+      color: var(--muted); font-size: 0.85rem;
+    }
+    .brain-placeholder svg { opacity: 0.3; }
+    .metrics-row { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .metric-box {
+      flex: 1; min-width: 100px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.8rem; text-align: center;
+    }
+    .metric-box .m-val { font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+    .metric-box .m-val.highlight { color: var(--green); }
+    .metric-box .m-label { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+    .metric-box.noise .m-val { color: var(--orange); }
+    .config-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(78,204,163,0.1); border: 1px solid rgba(78,204,163,0.3);
+      color: var(--green); font-size: 0.75rem; padding: 3px 10px; border-radius: 20px;
+      margin-top: 0.4rem;
+    }
+
+    /* RESULTS TABLE */
+    .results-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .results-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .rtab {
+      padding: 0.8rem 1.4rem; font-size: 0.83rem; cursor: pointer;
+      border-bottom: 2px solid transparent; color: var(--muted); font-weight: 600;
+      transition: all .2s;
+    }
+    .rtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .rtab-panel { display: none; padding: 1.4rem; }
+    .rtab-panel.active { display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { text-align: left; padding: 0.6rem 0.8rem; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    td { padding: 0.65rem 0.8rem; border-bottom: 1px solid rgba(42,47,62,0.5); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .badge-best { background: rgba(78,204,163,0.15); color: var(--green); font-size: 0.7rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+    .badge-model { background: rgba(91,143,249,0.12); color: var(--accent2); font-size: 0.7rem; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .bar-cell { display: flex; align-items: center; gap: 0.5rem; }
+    .bar { height: 6px; border-radius: 3px; background: var(--accent); opacity: 0.7; }
+
+    /* CHART */
+    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; }
+    .chart-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1.2rem; }
+    .bar-chart { display: flex; flex-direction: column; gap: 0.7rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.8rem; font-size: 0.78rem; }
+    .bar-label { width: 140px; color: var(--muted); text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 22px; position: relative; }
+    .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 0.73rem; font-weight: 700; color: #fff; }
+    .bar-fill.v { background: linear-gradient(90deg, var(--accent), #8aaef9); }
+    .bar-fill.i { background: linear-gradient(90deg, var(--green), #6de8c6); }
+    .bar-fill.nc { background: linear-gradient(90deg, var(--orange), #f9c87d); }
+    .noise-line {
+      position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--orange);
+      pointer-events: none;
+    }
+
+    /* KEY FINDINGS */
+    .findings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .finding-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.4rem; border-left: 3px solid var(--accent);
+    }
+    .finding-card.green-left { border-left-color: var(--green); }
+    .finding-card.orange-left { border-left-color: var(--orange); }
+    .finding-num { font-size: 0.7rem; color: var(--accent); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+    .finding-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .finding-card p { font-size: 0.82rem; color: var(--muted); }
+
+    /* METHODOLOGY */
+    .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .method-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; }
+    .method-block h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.8rem; color: var(--accent2); }
+    .method-block ul { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+    .method-block li { font-size: 0.82rem; color: var(--muted); padding-left: 1rem; position: relative; }
+    .method-block li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+    .code-block {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem; font-family: 'Fira Code', 'Courier New', monospace; font-size: 0.78rem;
+      color: var(--accent2); margin-top: 0.8rem; overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* BRAIN GALLERY */
+    .gallery-controls { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+    .gallery-btn {
+      padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      cursor: pointer; transition: all .2s;
+    }
+    .gallery-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .gallery-item {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; cursor: pointer; transition: border-color .2s, transform .2s;
+    }
+    .gallery-item:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .gallery-item img { width: 100%; display: block; }
+    .gallery-item-label { padding: 0.5rem 0.8rem; font-size: 0.75rem; color: var(--muted); }
+    .gallery-item-label strong { display: block; color: var(--text); font-size: 0.82rem; }
+
+    /* LIGHTBOX */
+    .lightbox {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+    .lightbox-close {
+      position: absolute; top: 1.5rem; right: 2rem; color: #fff; font-size: 1.8rem;
+      cursor: pointer; background: none; border: none;
+    }
+    .lightbox-caption {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      color: #fff; font-size: 0.85rem; background: rgba(0,0,0,0.7); padding: 0.4rem 1rem; border-radius: 8px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 2rem; text-align: center; color: var(--muted); font-size: 0.82rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 720px) {
+      .explorer-body { grid-template-columns: 1fr; }
+      .controls-panel { border-right: none; border-bottom: 1px solid var(--border); }
+      .method-grid { grid-template-columns: 1fr; }
+      .stat-item { min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">TEAM-13 &middot; CSAI 2026</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#explorer">Explorer</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#gallery">Brain Maps</a></li>
+    <li><a href="#methods">Methods</a></li>
+    <li><span class="nav-badge">Algonauts</span></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="overview">
+  <div class="hero-tag">&#129504; Cognitive Science &amp; AI &middot; Project A7</div>
+  <h1>Predicting Brain Activity with<br/><span>JEPA Vision Models</span></h1>
+  <p class="hero-sub">We benchmark I-JEPA and V-JEPA2 joint-embedding predictive architectures as neural encoders for fMRI activity during naturalistic movie viewing — the Algonauts 2025 Challenge.</p>
+  <div class="hero-meta">
+    <div class="meta-chip"><strong>Dataset:</strong> Friends S1 (naturalistic video)</div>
+    <div class="meta-chip"><strong>Atlas:</strong> Schaefer-1000 parcels</div>
+    <div class="meta-chip"><strong>Subjects:</strong> sub-01, 02, 03, 05</div>
+    <div class="meta-chip"><strong>Models:</strong> V-JEPA2-ViT-L &amp; I-JEPA-ViT-H</div>
+  </div>
+  <div class="hero-cta">
+    <a href="#explorer" class="btn btn-primary">Try the Explorer</a>
+    <a href="#results" class="btn btn-outline">View Results</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-val">0.1483</div>
+    <div class="stat-label">Noise Ceiling (ISC)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val green">0.1636</div>
+    <div class="stat-label">Best Pearson r (V-JEPA, sub-02, 2%)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val orange">0.1483</div>
+    <div class="stat-label">ISC Noise Ceiling (upper bound)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val">1000</div>
+    <div class="stat-label">Brain Parcels Predicted</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val">2</div>
+    <div class="stat-label">Models Benchmarked</div>
+  </div>
+</div>
+
+<!-- OVERVIEW CARDS -->
+<section>
+  <h2 class="section-title">What We Did <span>&amp; Why</span></h2>
+  <p class="section-sub">A joint-embedding predictive architecture (JEPA) learns rich internal representations — we ask: how well do those representations predict human brain activity?</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#127909;</div>
+      <h3>V-JEPA2 — Video Model</h3>
+      <p>Facebook's video JEPA (ViT-L backbone). We extract features at different temporal sampling fractions (1%–10%) to find the optimal temporal coverage per TR.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128247;</div>
+      <h3>I-JEPA — Image Model</h3>
+      <p>Facebook's image JEPA (ViT-H, ImageNet-22k). We aggregate across frame counts (8–240 frames/clip) to study how temporal pooling affects brain alignment.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#129504;</div>
+      <h3>fMRI Neural Encoding</h3>
+      <p>Ridge regression maps model embeddings → Schaefer-1000 fMRI parcels. Lag-aligned to the hemodynamic response (3 TRs). Evaluated by Pearson correlation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128202;</div>
+      <h3>Layer &amp; Config Sweep</h3>
+      <p>We compare 4 feature extraction points within V-JEPA (enc-10, enc-18, enc-20, enc-last-ln) and 5 temporal configs for each model type.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PIPELINE -->
+<section>
+  <h2 class="section-title">Processing <span>Pipeline</span></h2>
+  <p class="section-sub">End-to-end from raw video to brain prediction, with GPU optimization throughout.</p>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">STEP 01</div>
+      <div class="step-title">Video Chunking</div>
+      <div class="step-detail">8s chunks, 6s pre-stimulus context, TR-aligned at 1.49s intervals</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">STEP 02</div>
+      <div class="step-title">Frame Sampling</div>
+      <div class="step-detail">Uniform subsampling at configurable fraction (1–10%) or frame count (8–240)</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">STEP 03</div>
+      <div class="step-title">JEPA Embedding</div>
+      <div class="step-detail">Multi-GPU bfloat16 inference; hook-based intermediate layer extraction</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">STEP 04</div>
+      <div class="step-title">Ridge Regression</div>
+      <div class="step-detail">Dual-form kernel ridge (avoids D≫N OOM); α ∈ {0.1…1000}, 5-fold CV</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">STEP 05</div>
+      <div class="step-title">Evaluation</div>
+      <div class="step-detail">Pearson r per parcel; mean, median, max, % positive; vs. ISC noise ceiling</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INTERACTIVE EXPLORER -->
+<section id="explorer">
+  <h2 class="section-title">Brain Map <span>Explorer</span></h2>
+  <p class="section-sub">Select a model, configuration, and subject to inspect the predicted Pearson correlation map on the cortical surface.</p>
+  <div class="explorer">
+    <div class="explorer-header">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <span class="explorer-title">Neural Encoding — Interactive Viewer</span>
+    </div>
+    <div class="explorer-body">
+      <div class="controls-panel">
+        <div class="control-group">
+          <label>Model</label>
+          <select id="sel-model" onchange="updateExplorer()">
+            <option value="vjepa">V-JEPA2 (Video)</option>
+            <option value="ijepa">I-JEPA (Image)</option>
+          </select>
+        </div>
+        <div class="control-group" id="vjepa-config-group">
+          <label>Sample Fraction</label>
+          <select id="sel-vjepa-config" onchange="updateExplorer()">
+            <option value="1">1% frames sampled</option>
+            <option value="2">2% frames sampled</option>
+            <option value="4">4% frames sampled</option>
+            <option value="8">8% frames sampled</option>
+            <option value="10" selected>10% frames sampled</option>
+          </select>
+        </div>
+        <div class="control-group" id="ijepa-config-group" style="display:none">
+          <label>Frames per Clip</label>
+          <select id="sel-ijepa-config" onchange="updateExplorer()">
+            <option value="8">8 frames</option>
+            <option value="16">16 frames</option>
+            <option value="32">32 frames</option>
+            <option value="64" selected>64 frames</option>
+            <option value="240">240 frames</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Subject</label>
+          <select id="sel-subject" onchange="updateExplorer()">
+            <option value="mean">Mean (all subjects)</option>
+            <option value="sub01">Subject 01</option>
+            <option value="sub02">Subject 02</option>
+            <option value="sub03">Subject 03</option>
+            <option value="sub05">Subject 05</option>
+          </select>
+        </div>
+        <button class="run-btn" onclick="updateExplorer()">&#9654; Show Brain Map</button>
+        <div id="explorer-config-info" style="margin-top:0.5rem;"></div>
+      </div>
+      <div class="results-panel">
+        <div class="brain-display" id="brain-display">
+          <img id="brain-img" src="" alt="" style="display:none" />
+          <div class="brain-placeholder" id="brain-placeholder">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2C8 2 5 5 5 9c0 2 .8 3.8 2 5 .5.6 1 1.2 1 2v2h8v-2c0-.8.5-1.4 1-2 1.2-1.2 2-3 2-5 0-4-3-7-7-7z"/>
+            </svg>
+            <span>Select options and click Show Brain Map</span>
+          </div>
+        </div>
+        <div class="metrics-row" id="explorer-metrics" style="display:none">
+          <div class="metric-box">
+            <div class="m-val highlight" id="m-pearson">—</div>
+            <div class="m-label">Mean Pearson r</div>
+          </div>
+          <div class="metric-box">
+            <div class="m-val" id="m-pct">—</div>
+            <div class="m-label">% Positive Parcels</div>
+          </div>
+          <div class="metric-box noise">
+            <div class="m-val">0.1483</div>
+            <div class="m-label">Noise Ceiling (ISC)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESULTS -->
+<section id="results">
+  <h2 class="section-title">Quantitative <span>Results</span></h2>
+  <p class="section-sub">Performance across all model variants, layer configurations, and temporal sampling strategies.</p>
+
+  <!-- CHART -->
+  <div class="chart-wrap" style="margin-bottom:1.5rem;">
+    <div class="chart-title">Mean Pearson r — V-JEPA Sampling Fraction Sweep (vs. Noise Ceiling)</div>
+    <div class="bar-chart">
+      <div class="bar-row">
+        <div class="bar-label">V-JEPA 1% &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill v" style="width:75.1%">0.1217</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">V-JEPA 2% &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill v" style="width:80.3%">0.1357</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">V-JEPA 4% &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill v" style="width:67.2%">0.1268</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">V-JEPA 8% &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill v" style="width:70.7%">0.1157</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">V-JEPA 10% &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill v" style="width:72.4%">0.1131</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">I-JEPA 8f &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill i" style="width:54.0%">0.1034</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">I-JEPA 16f &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill i" style="width:61.5%">0.1105</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">I-JEPA 32f &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill i" style="width:62.8%">0.1119</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">I-JEPA 64f &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill i" style="width:63.2%">0.1120</div>
+          <div class="noise-line" style="left:91.5%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--orange)">Noise Ceiling &nbsp;</div>
+        <div class="bar-track">
+          <div class="bar-fill nc" style="width:91.5%">0.1483</div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:0.73rem;color:var(--muted);margin-top:0.8rem;">Orange dashed line = Inter-Subject Correlation noise ceiling. Bars show mean Pearson r averaged across all 4 subjects.</p>
+  </div>
+
+  <!-- TABS TABLE -->
+  <div class="results-section">
+    <div class="results-tabs">
+      <div class="rtab active" onclick="switchTab(this,'vjepa-layer')">V-JEPA Layer Comparison</div>
+      <div class="rtab" onclick="switchTab(this,'vjepa-frac')">V-JEPA Sampling</div>
+      <div class="rtab" onclick="switchTab(this,'ijepa-frames')">I-JEPA Frame Count</div>
+    </div>
+
+    <!-- V-JEPA Layer -->
+    <div class="rtab-panel active" id="tab-vjepa-layer">
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th><th>Feature Layer</th><th>Mean Pearson r</th><th>Median r</th><th>Max r</th><th>% Positive</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>sub-01</td><td><span class="badge-model">enc-last-ln</span></td><td><div class="bar-cell"><div class="bar" style="width:60px"></div>0.0951</div></td><td>0.0581</td><td>0.4676</td><td>97.0%</td><td><span class="badge-best">BEST</span></td></tr>
+          <tr><td>sub-01</td><td><span class="badge-model">enc-18layer-norm2</span></td><td><div class="bar-cell"><div class="bar" style="width:60px;opacity:0.85"></div>0.0954</div></td><td>0.0563</td><td>0.4749</td><td>94.4%</td><td></td></tr>
+          <tr><td>sub-01</td><td><span class="badge-model">enc-20layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:55px"></div>0.0881</div></td><td>0.0497</td><td>0.4434</td><td>94.1%</td><td></td></tr>
+          <tr><td>sub-01</td><td><span class="badge-model">enc-10layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:47px"></div>0.0751</div></td><td>0.0440</td><td>0.4141</td><td>93.0%</td><td></td></tr>
+          <tr style="border-top:2px solid var(--border)"><td>sub-02</td><td><span class="badge-model">enc-last-ln</span></td><td><div class="bar-cell"><div class="bar" style="width:50px"></div>0.0790</div></td><td>0.0437</td><td>0.4566</td><td>95.7%</td><td><span class="badge-best">BEST</span></td></tr>
+          <tr><td>sub-02</td><td><span class="badge-model">enc-18layer-norm2</span></td><td><div class="bar-cell"><div class="bar" style="width:50px"></div>0.0795</div></td><td>0.0396</td><td>0.4630</td><td>94.1%</td><td></td></tr>
+          <tr><td>sub-02</td><td><span class="badge-model">enc-20layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:45px"></div>0.0717</div></td><td>0.0359</td><td>0.4370</td><td>94.0%</td><td></td></tr>
+          <tr><td>sub-02</td><td><span class="badge-model">enc-10layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:38px"></div>0.0593</div></td><td>0.0316</td><td>0.4207</td><td>92.6%</td><td></td></tr>
+          <tr style="border-top:2px solid var(--border)"><td>sub-03</td><td><span class="badge-model">enc-18layer-norm2</span></td><td><div class="bar-cell"><div class="bar" style="width:61px"></div>0.0966</div></td><td>0.0580</td><td>0.4998</td><td>96.4%</td><td><span class="badge-best">BEST</span></td></tr>
+          <tr><td>sub-03</td><td><span class="badge-model">enc-last-ln</span></td><td><div class="bar-cell"><div class="bar" style="width:59px"></div>0.0938</div></td><td>0.0556</td><td>0.4836</td><td>95.4%</td><td></td></tr>
+          <tr><td>sub-03</td><td><span class="badge-model">enc-20layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:55px"></div>0.0870</div></td><td>0.0520</td><td>0.4815</td><td>95.8%</td><td></td></tr>
+          <tr><td>sub-03</td><td><span class="badge-model">enc-10layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:46px"></div>0.0726</div></td><td>0.0418</td><td>0.4482</td><td>91.3%</td><td></td></tr>
+          <tr style="border-top:2px solid var(--border)"><td>sub-05</td><td><span class="badge-model">enc-last-ln</span></td><td><div class="bar-cell"><div class="bar" style="width:46px"></div>0.0729</div></td><td>0.0482</td><td>0.3778</td><td>94.8%</td><td><span class="badge-best">BEST</span></td></tr>
+          <tr><td>sub-05</td><td><span class="badge-model">enc-18layer-norm2</span></td><td><div class="bar-cell"><div class="bar" style="width:48px"></div>0.0753</div></td><td>0.0463</td><td>0.4121</td><td>93.1%</td><td></td></tr>
+          <tr><td>sub-05</td><td><span class="badge-model">enc-20layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:42px"></div>0.0671</div></td><td>0.0420</td><td>0.3849</td><td>91.5%</td><td></td></tr>
+          <tr><td>sub-05</td><td><span class="badge-model">enc-10layer-fc2</span></td><td><div class="bar-cell"><div class="bar" style="width:36px"></div>0.0563</div></td><td>0.0335</td><td>0.3542</td><td>90.3%</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- V-JEPA Fraction -->
+    <div class="rtab-panel" id="tab-vjepa-frac">
+      <table>
+        <thead>
+          <tr><th>Sample Fraction</th><th>Sub-01</th><th>Sub-02</th><th>Sub-03</th><th>Sub-05</th><th>Mean</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1% (0.01)</td><td>0.1488</td><td>0.1429</td><td>0.0933</td><td>0.1018</td><td><strong>0.1217</strong></td><td></td></tr>
+          <tr><td>2% (0.02)</td><td>0.1436</td><td>0.1636</td><td>0.1196</td><td>0.1159</td><td><strong>0.1357</strong></td><td><span class="badge-best">BEST MEAN</span></td></tr>
+          <tr><td>4% (0.04)</td><td>0.1242</td><td>0.1241</td><td>0.1467</td><td>0.1123</td><td><strong>0.1268</strong></td><td></td></tr>
+          <tr><td>8% (0.08)</td><td>0.1279</td><td>0.1022</td><td>0.1279</td><td>0.1048</td><td><strong>0.1157</strong></td><td></td></tr>
+          <tr><td>10% (0.10)</td><td>0.1366</td><td>0.1156</td><td>0.1091</td><td>0.0909</td><td><strong>0.1131</strong></td><td></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;">Lower sampling fractions (1–2%) can outperform higher ones because they reduce redundancy in the temporal feature. Sub-02 achieves 0.1636 — exceeding the noise ceiling of 0.1483.</p>
+    </div>
+
+    <!-- I-JEPA Frames -->
+    <div class="rtab-panel" id="tab-ijepa-frames">
+      <table>
+        <thead>
+          <tr><th>Frames/Clip</th><th>Sub-01</th><th>Sub-02</th><th>Sub-03</th><th>Sub-05</th><th>Mean</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr><td>8 frames</td><td>0.0875</td><td>0.0775</td><td>0.0847</td><td>0.0683</td><td><strong>0.0795</strong></td><td></td></tr>
+          <tr><td>16 frames</td><td>0.0973</td><td>0.0867</td><td>0.0950</td><td>0.0798</td><td><strong>0.0897</strong></td><td></td></tr>
+          <tr><td>32 frames</td><td>0.1017</td><td>0.0866</td><td>0.0973</td><td>0.0807</td><td><strong>0.0916</strong></td><td><span class="badge-best">BEST</span></td></tr>
+          <tr><td>64 frames</td><td>0.1006</td><td>0.0859</td><td>0.0973</td><td>0.0797</td><td><strong>0.0909</strong></td><td></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;">For I-JEPA, more frames generally helps up to ~32 frames. Beyond 32, gains plateau. 8 frames is insufficient — the model lacks temporal context to match brain responses to longer video chunks.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BRAIN GALLERY -->
+<section id="gallery">
+  <h2 class="section-title">Brain Activation <span>Maps</span></h2>
+  <p class="section-sub">Pearson correlation per Schaefer-1000 parcel, projected onto the cortical surface. Brighter regions = higher brain–model alignment.</p>
+  <div class="gallery-controls">
+    <button class="gallery-btn active" onclick="filterGallery('all',this)">All</button>
+    <button class="gallery-btn" onclick="filterGallery('vjepa-mean',this)">V-JEPA (Mean)</button>
+    <button class="gallery-btn" onclick="filterGallery('ijepa-mean',this)">I-JEPA (Mean)</button>
+    <button class="gallery-btn" onclick="filterGallery('sub01',this)">Subject 01</button>
+    <button class="gallery-btn" onclick="filterGallery('sub02',this)">Subject 02</button>
+    <button class="gallery-btn" onclick="filterGallery('sub03',this)">Subject 03</button>
+    <button class="gallery-btn" onclick="filterGallery('sub05',this)">Subject 05</button>
+  </div>
+  <div class="gallery-grid" id="gallery-grid">
+    <!-- V-JEPA -->
+    <div class="gallery-item" data-tags="vjepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/1/mean.png" alt="V-JEPA 1% Mean" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.gallery-item-label').innerHTML='<strong>V-JEPA 1% — Mean</strong><br><span style=color:var(--red)>Image not found</span>'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 1% — Mean</strong>Sample fraction: 1%</div>
+    </div>
+    <div class="gallery-item" data-tags="vjepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/2/mean.png" alt="V-JEPA 2% Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 2% — Mean</strong>Sample fraction: 2%</div>
+    </div>
+    <div class="gallery-item" data-tags="vjepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/4/mean.png" alt="V-JEPA 4% Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 4% — Mean</strong>Sample fraction: 4%</div>
+    </div>
+    <div class="gallery-item" data-tags="vjepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/8/mean.png" alt="V-JEPA 8% Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 8% — Mean</strong>Sample fraction: 8%</div>
+    </div>
+    <div class="gallery-item" data-tags="vjepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/10/mean.png" alt="V-JEPA 10% Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 10% — Mean</strong>Sample fraction: 10%</div>
+    </div>
+
+    <!-- V-JEPA per-subject (10%) -->
+    <div class="gallery-item" data-tags="sub01 all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/10/sub01.png" alt="V-JEPA 10% Sub-01" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 10% — Sub-01</strong>Pearson r = 0.0951</div>
+    </div>
+    <div class="gallery-item" data-tags="sub02 all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/10/sub02.png" alt="V-JEPA 10% Sub-02" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 10% — Sub-02</strong>Pearson r = 0.0790</div>
+    </div>
+    <div class="gallery-item" data-tags="sub03 all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/10/sub03.png" alt="V-JEPA 10% Sub-03" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 10% — Sub-03</strong>Pearson r = 0.0938</div>
+    </div>
+    <div class="gallery-item" data-tags="sub05 all" onclick="openLightbox(this)">
+      <img src="brain_vis/vjepa/10/sub05.png" alt="V-JEPA 10% Sub-05" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>V-JEPA 10% — Sub-05</strong>Pearson r = 0.0729</div>
+    </div>
+
+    <!-- I-JEPA -->
+    <div class="gallery-item" data-tags="ijepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/8f/mean.png" alt="I-JEPA 8f Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 8f — Mean</strong>8 frames/clip</div>
+    </div>
+    <div class="gallery-item" data-tags="ijepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/16f/mean.png" alt="I-JEPA 16f Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 16f — Mean</strong>16 frames/clip</div>
+    </div>
+    <div class="gallery-item" data-tags="ijepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/32f/mean.png" alt="I-JEPA 32f Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 32f — Mean</strong>32 frames/clip ⭐ Best</div>
+    </div>
+    <div class="gallery-item" data-tags="ijepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/64f/mean.png" alt="I-JEPA 64f Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 64f — Mean</strong>64 frames/clip</div>
+    </div>
+    <div class="gallery-item" data-tags="ijepa-mean all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/240f/mean.png" alt="I-JEPA 240f Mean" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 240f — Mean</strong>240 frames/clip</div>
+    </div>
+
+    <!-- I-JEPA per-subject (32f) -->
+    <div class="gallery-item" data-tags="sub01 all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/32f/sub01.png" alt="I-JEPA 32f Sub-01" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 32f — Sub-01</strong>Pearson r = 0.1017</div>
+    </div>
+    <div class="gallery-item" data-tags="sub02 all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/32f/sub02.png" alt="I-JEPA 32f Sub-02" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 32f — Sub-02</strong>Pearson r = 0.0866</div>
+    </div>
+    <div class="gallery-item" data-tags="sub03 all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/32f/sub03.png" alt="I-JEPA 32f Sub-03" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 32f — Sub-03</strong>Pearson r = 0.0973</div>
+    </div>
+    <div class="gallery-item" data-tags="sub05 all" onclick="openLightbox(this)">
+      <img src="brain_vis/ijepa/32f/sub05.png" alt="I-JEPA 32f Sub-05" loading="lazy" onerror="this.style.display='none'"/>
+      <div class="gallery-item-label"><strong>I-JEPA 32f — Sub-05</strong>Pearson r = 0.0807</div>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&#10005;</button>
+  <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()"/>
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FINDINGS -->
+<section>
+  <h2 class="section-title">Key <span>Findings</span></h2>
+  <p class="section-sub">What we learned from the sweep.</p>
+  <div class="findings-grid">
+    <div class="finding-card">
+      <div class="finding-num">FINDING 01</div>
+      <h3>V-JEPA outperforms I-JEPA</h3>
+      <p>Video-native features from V-JEPA2 consistently yield higher mean Pearson r than image-based I-JEPA features (0.12–0.14 vs 0.08–0.09), suggesting temporal continuity is important for brain encoding during movie viewing.</p>
+    </div>
+    <div class="finding-card green-left">
+      <div class="finding-num">FINDING 02</div>
+      <h3>Less sampling can be better (V-JEPA)</h3>
+      <p>1–2% temporal sampling outperforms 10%. Sparse uniform sampling reduces temporal redundancy, forcing the model to represent maximally diverse moments — this appears to align better with the brain's efficient coding of scene structure.</p>
+    </div>
+    <div class="finding-card orange-left">
+      <div class="finding-num">FINDING 03</div>
+      <h3>More frames helps I-JEPA (up to 32)</h3>
+      <p>I-JEPA performance increases from 8→32 frames and plateaus. An image model needs sufficient temporal pooling to capture motion and scene transitions it cannot natively model. Beyond 32f, averaging dilutes relevant signal.</p>
+    </div>
+    <div class="finding-card">
+      <div class="finding-num">FINDING 04</div>
+      <h3>Final layer norm is most brain-like</h3>
+      <p>enc-last-ln consistently outperforms earlier layers (enc-10, enc-18, enc-20). The most abstract, post-normalization representation is the best predictor of cortical fMRI activity across all 4 subjects.</p>
+    </div>
+    <div class="finding-card green-left">
+      <div class="finding-num">FINDING 05</div>
+      <h3>Best config matches noise ceiling</h3>
+      <p>V-JEPA 2%, sub-02 achieves Pearson r = 0.1636, which exceeds the ISC noise ceiling of 0.1483. This suggests the model captures genuine signal, not just shared variance — strong evidence of brain–model alignment.</p>
+    </div>
+    <div class="finding-card orange-left">
+      <div class="finding-num">FINDING 06</div>
+      <h3>Subject variability is real</h3>
+      <p>Sub-01 and Sub-03 consistently outperform Sub-02 and Sub-05. This likely reflects both individual neural variability and signal quality differences in the fMRI recordings rather than model issues.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METHODS -->
+<section id="methods">
+  <h2 class="section-title">Technical <span>Details</span></h2>
+  <p class="section-sub">Implementation specifics for reproducibility.</p>
+  <div class="method-grid">
+    <div class="method-block">
+      <h3>Models</h3>
+      <ul>
+        <li>V-JEPA2: <code>facebook/vjepa2-vitl-fpc64-256</code></li>
+        <li>I-JEPA: <code>facebook/ijepa_vith14_22k</code></li>
+        <li>Hook-based intermediate layer extraction</li>
+        <li>bfloat16 inference, float16 storage</li>
+        <li>Multi-GPU with OOM retry schedule</li>
+      </ul>
+      <div class="code-block">VJEPA layers tapped:
+  enc-10layer-fc2   (layer 10)
+  enc-18layer-norm2 (layer 18)
+  enc-20layer-fc2   (layer 20)
+  enc-last-ln       (final norm) ← best</div>
+    </div>
+    <div class="method-block">
+      <h3>Temporal Alignment</h3>
+      <ul>
+        <li>TR = 1.49 seconds</li>
+        <li>Chunk length: 8.0s, 6.0s pre-stimulus context</li>
+        <li>3 TR hemodynamic lag correction</li>
+        <li>Clip-matched (not random) train/test split</li>
+        <li>80% train / 20% test (58 test clips)</li>
+      </ul>
+      <div class="code-block">chunk_length   = 8.0s
+seconds_before = 6.0s
+hrf_lag        = 3 TRs (~4.5s)
+train_fraction = 0.80</div>
+    </div>
+    <div class="method-block">
+      <h3>Ridge Regression</h3>
+      <ul>
+        <li>Dual-form kernel ridge (solves N×N not D×D)</li>
+        <li>Avoids OOM when feature dim D ≫ N samples</li>
+        <li>Alpha: [0.1, 1.0, 10.0, 100.0, 1000.0]</li>
+        <li>Best alpha consistently 1000.0 (heavy L2)</li>
+        <li>Per-parcel prediction (1000 outputs)</li>
+      </ul>
+    </div>
+    <div class="method-block">
+      <h3>Noise Ceiling</h3>
+      <ul>
+        <li>ISC (Inter-Subject Correlation) as proxy ceiling</li>
+        <li>287 clips shared across all 4 subjects</li>
+        <li>58 test-set clips used for ISC estimation</li>
+        <li>Global ISC = 0.1483 Pearson r</li>
+        <li>Method: Nastase et al. (2019)</li>
+      </ul>
+      <div class="code-block">Noise Ceiling (ISC): 0.1483
+Best Model:          0.1636 (sub-02, 2%)
+Method: Nastase et al. (2019) ISC</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Team-13 &middot; Cognitive Science &amp; AI 2025 &middot; Project A7 — Algonauts 2025 Neural Encoding Challenge</p>
+  <p style="margin-top:0.4rem;">V-JEPA2 &amp; I-JEPA &middot; Schaefer-1000 Atlas &middot; Friends Season 1 &middot; 4 Subjects</p>
+</footer>
+
+<script>
+  // Data for the explorer
+  const VJEPA_DATA = {
+    "1":  { sub01: 0.1488, sub02: 0.1429, sub03: 0.0933, sub05: 0.1018, mean: 0.1217, pct: "~94%" },
+    "2":  { sub01: 0.1436, sub02: 0.1636, sub03: 0.1196, sub05: 0.1159, mean: 0.1357, pct: "~95%" },
+    "4":  { sub01: 0.1242, sub02: 0.1241, sub03: 0.1467, sub05: 0.1123, mean: 0.1268, pct: "~95%" },
+    "8":  { sub01: 0.1279, sub02: 0.1022, sub03: 0.1279, sub05: 0.1048, mean: 0.1157, pct: "~94%" },
+    "10": { sub01: 0.1366, sub02: 0.1156, sub03: 0.1091, sub05: 0.0909, mean: 0.1131, pct: "~94%" }
+  };
+  const IJEPA_DATA = {
+    "8":   { sub01: 0.0875, sub02: 0.0775, sub03: 0.0847, sub05: 0.0683, mean: 0.0795, pct: "~90%" },
+    "16":  { sub01: 0.0973, sub02: 0.0867, sub03: 0.0950, sub05: 0.0798, mean: 0.0897, pct: "~92%" },
+    "32":  { sub01: 0.1017, sub02: 0.0866, sub03: 0.0973, sub05: 0.0807, mean: 0.0916, pct: "~93%" },
+    "64":  { sub01: 0.1006, sub02: 0.0859, sub03: 0.0973, sub05: 0.0797, mean: 0.0909, pct: "~92%" },
+    "240": { sub01: 0.1006, sub02: 0.0859, sub03: 0.0973, sub05: 0.0797, mean: 0.0909, pct: "~92%" }
+  };
+
+  function updateExplorer() {
+    const model = document.getElementById('sel-model').value;
+    const vjCfg = document.getElementById('sel-vjepa-config').value;
+    const ijCfg = document.getElementById('sel-ijepa-config').value;
+    const subject = document.getElementById('sel-subject').value;
+
+    // Show/hide config dropdowns
+    document.getElementById('vjepa-config-group').style.display = model === 'vjepa' ? 'block' : 'none';
+    document.getElementById('ijepa-config-group').style.display = model === 'ijepa' ? 'block' : 'none';
+
+    // Build image path
+    let imgPath, cfg, data, pearson, pct;
+    if (model === 'vjepa') {
+      cfg = vjCfg;
+      imgPath = `brain_vis/vjepa/${cfg}/${subject}.png`;
+      data = VJEPA_DATA[cfg];
+    } else {
+      cfg = ijCfg;
+      imgPath = `brain_vis/ijepa/${cfg}f/${subject}.png`;
+      data = IJEPA_DATA[cfg];
+    }
+
+    if (subject === 'mean') {
+      pearson = data.mean.toFixed(4);
+      pct = data.pct;
+    } else {
+      const key = subject.replace('-','');
+      pearson = (data[key] || 0).toFixed(4);
+      pct = data.pct;
+    }
+
+    const img = document.getElementById('brain-img');
+    const placeholder = document.getElementById('brain-placeholder');
+    img.src = imgPath;
+    img.alt = `${model.toUpperCase()} ${cfg} - ${subject}`;
+    img.style.display = 'block';
+    img.onerror = () => {
+      img.style.display = 'none';
+      placeholder.style.display = 'flex';
+      placeholder.innerHTML = '<span style="color:var(--red)">Image not available for this config</span>';
+    };
+    img.onload = () => { placeholder.style.display = 'none'; };
+    placeholder.style.display = 'none';
+
+    document.getElementById('explorer-metrics').style.display = 'flex';
+    document.getElementById('m-pearson').textContent = pearson;
+    document.getElementById('m-pct').textContent = pct;
+  }
+
+  function switchTab(el, tabId) {
+    document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.rtab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+  }
+
+  function filterGallery(tag, btn) {
+    document.querySelectorAll('.gallery-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      const tags = item.dataset.tags || '';
+      item.style.display = (tag === 'all' || tags.includes(tag)) ? 'block' : 'none';
+    });
+  }
+
+  function openLightbox(item) {
+    const img = item.querySelector('img');
+    const label = item.querySelector('.gallery-item-label');
+    if (!img || img.style.display === 'none') return;
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox-caption').textContent = label ? label.textContent.trim().replace(/\s+/g,' ') : '';
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

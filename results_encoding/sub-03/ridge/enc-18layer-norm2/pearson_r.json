@@ -1,0 +1,13 @@
+{
+  "model": "ridge",
+  "feature_key": "enc-18layer-norm2",
+  "subject": "sub-03",
+  "n_timepoints": 11287,
+  "n_features": 9216,
+  "n_parcels": 1000,
+  "n_folds": 5,
+  "mean_r": 0.09655033427699891,
+  "median_r": 0.05803946778178215,
+  "max_r": 0.49976101517677307,
+  "pct_positive": 96.39999999999999
+}

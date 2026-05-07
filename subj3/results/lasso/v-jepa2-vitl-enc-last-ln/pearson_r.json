@@ -1,0 +1,13 @@
+{
+  "model": "lasso",
+  "feature_key": "v-jepa2-vitl-enc-last-ln",
+  "subject": "sub-03",
+  "n_timepoints": 1183,
+  "n_features": 9216,
+  "n_parcels": 1000,
+  "n_folds": 5,
+  "mean_r": 0.06858158492310759,
+  "median_r": 0.054248321801424026,
+  "max_r": 0.41392818093299866,
+  "pct_positive": 79.60000000000001
+}

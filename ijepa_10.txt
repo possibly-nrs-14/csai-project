@@ -1,0 +1,31 @@
+64 frames
+
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1006  R2=-0.0467  alpha=1000.0  clips=48
+  sub-02: Pearson=0.0859  R2=-0.0581  alpha=1000.0  clips=48
+  sub-03: Pearson=0.0973  R2=-0.0529  alpha=1000.0  clips=48
+  sub-05: Pearson=0.0797  R2=-0.0667  alpha=1000.0  clips=48
+
+32 frames
+
+Clip-matched prediction summary:
+  sub-01: Pearson=0.1017  R2=-0.0462  alpha=1000.0  clips=48
+  sub-02: Pearson=0.0866  R2=-0.0580  alpha=1000.0  clips=48
+  sub-03: Pearson=0.0973  R2=-0.0532  alpha=1000.0  clips=48
+  sub-05: Pearson=0.0807  R2=-0.0664  alpha=1000.0  clips=48
+
+16 frames
+
+Clip-matched prediction summary:
+  sub-01: Pearson=0.0973  R2=-0.0505  alpha=1000.0  clips=48
+  sub-02: Pearson=0.0867  R2=-0.0596  alpha=1000.0  clips=48
+  sub-03: Pearson=0.0950  R2=-0.0556  alpha=1000.0  clips=48
+  sub-05: Pearson=0.0798  R2=-0.0685  alpha=1000.0  clips=48
+
+8 frames
+
+Clip-matched prediction summary:
+  sub-01: Pearson=0.0875  R2=-0.0688  alpha=1000.0  clips=48
+  sub-02: Pearson=0.0775  R2=-0.0753  alpha=1000.0  clips=48
+  sub-03: Pearson=0.0847  R2=-0.0746  alpha=1000.0  clips=48
+  sub-05: Pearson=0.0683  R2=-0.0881  alpha=1000.0  clips=48
